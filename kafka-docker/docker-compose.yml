@@ -1,21 +1,21 @@
-version: '3.8'
+version: '3.8'  # Compose file format version
 
 services:
   zookeeper:
-    image: bitnami/zookeeper:3.8
-    container_name: kafka-docker-zookeeper-1
+    image: bitnami/zookeeper:3.8  # Zookeeper image version 3.8
+    container_name: kafka-docker-zookeeper-1  # Container name for Zookeeper
     ports:
-      - "2181:2181"
+      - "2181:2181"  # Map host port 2181 to container port 2181 (Zookeeper default)
     environment:
-      - ALLOW_ANONYMOUS_LOGIN=yes
+      - ALLOW_ANONYMOUS_LOGIN=yes  # Allow anonymous login for simplicity
 
   kafka:
-    image: bitnami/kafka:3.4
-    container_name: kafka-docker-kafka-1
+    image: bitnami/kafka:3.4  # Kafka image version 3.4
+    container_name: kafka-docker-kafka-1  # Container name for Kafka
     ports:
-      - "9092:9092"
+      - "9092:9092"  # Map host port 9092 to container port 9092 (Kafka default)
     environment:
-      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
-      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
-      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181  # Kafka connects to Zookeeper at this address
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092  # Kafka listens for connections on port 9092 plaintext
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092  # Kafka advertises itself on localhost for clients
+      - ALLOW_PLAINTEXT_LISTENER=yes  # Allow plaintext listener for simplicity (no TLS)
