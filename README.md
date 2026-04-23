@@ -20,18 +20,18 @@ Sensor Simulator  →  Kafka Broker  →  Flask-SocketIO Consumer  →  WebSocke
 
 ## Tech Stack
 
-| Layer         | Tech                              |
-|---------------|-----------------------------------|
-| Messaging     | Apache Kafka (via Zookeeper)      |
-| Backend       | Flask, Flask-SocketIO, eventlet   |
-| Real-time     | WebSocket                         |
-| Orchestration | Docker Compose                    |
+| Layer         | Tech                         |
+|---------------|------------------------------|
+| Messaging     | Apache Kafka (via Zookeeper) |
+| Backend       | Flask, Flask-SocketIO        |
+| Real-time     | WebSocket                    |
+| Orchestration | Docker Compose               |
 
 ## Key design decisions
 
 - **Kafka over direct HTTP calls**: decouples sensor producers from the backend. Sensors keep producing even if the consumer is temporarily offline, and Kafka's persistent buffer prevents data loss on consumer failure. Also enables multiple consumers (monitoring, storage, alerting) to process the same stream independently.
 
-- **Flask-SocketIO with eventlet**: the sensor stream produces continuous updates that need to reach clients with minimal latency. WebSocket pushes updates at the sensor frequency without client-side polling overhead. Eventlet gives Flask async-style concurrency to handle Kafka consumption and WebSocket emission on the same process.
+- **Flask-SocketIO for real-time push**: the sensor stream produces continuous updates that need to reach clients with minimal latency. WebSocket pushes updates at the sensor frequency without client-side polling overhead.
 
 - **Anomaly detection at consumer layer**: keeps producers lightweight and moves processing logic to a scalable layer. Current rules are simple thresholds (temperature > 70 or vibration > 0.1), but the pattern supports extending to ML-based detection later.
 
