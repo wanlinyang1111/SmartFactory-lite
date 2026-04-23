@@ -1,49 +1,58 @@
-# 📄 README.md — SmartFactory Lite
+# SmartFactory Lite
 
-SmartFactory Lite is a real-time industrial monitoring platform that simulates and tracks sensor data (like temperature and vibration) to demonstrate a scalable, event-driven system architecture. The system is designed as a multi-module, modern backend infrastructure project suitable for showcasing skills in distributed systems, cloud infrastructure, real-time data handling, and DevOps workflows.
+A real-time IIoT monitoring prototype simulating factory sensor data through an event-driven Kafka pipeline.
 
-This repository presents a working prototype of how factories can monitor real-time sensor feeds, detect anomalies, and prepare for downstream integrations like alerts, dashboards, and databases. While the project is under active development, the architectural foundation already reflects core principles used in production-level systems.
+Built as a self-directed project to explore production-style backend architecture: decoupled producers and consumers, streaming data, and anomaly detection at the processing layer.
 
----
+## What it does
 
-## 💡 Project Vision
+- Simulates industrial sensors (temperature, vibration) producing data every second
+- Streams sensor data through Apache Kafka for decoupled, scalable message delivery
+- Flask consumer processes the Kafka stream and runs real-time anomaly detection
+- Runs locally via Docker Compose for reproducible multi-service development
 
-- Create an extensible backend system simulating industrial IoT data pipelines
-- Apply Kafka-based streaming for real-time, decoupled data flow
-- Enable integration with multiple modules: monitoring, visualization, alerting, and persistence
-- Support scalable, production-style deployment using Docker Compose
+## Architecture
 
----
+```
+Sensor Simulator  →  Kafka Broker  →  Flask Consumer (with anomaly detection)
+```
 
-## 🔧 Core Modules
+## Tech Stack
 
-- **Sensor Simulator**: Mocks data every second to simulate real factory conditions.
-- **Kafka Pipeline**: Acts as the core data stream buffer, decoupling producers and consumers.
-- **Flask Backend**: Listens to Kafka stream and processes incoming sensor data.
-- **WebSocket Server** *(upcoming)*: Pushes data in real-time to frontend dashboards.
-- **React Dashboard** *(upcoming)*: Visualizes live sensor metrics with real-time charts.
-- **Future Add-ons**: Alerting (Slack/LINE), Persistence (PostgreSQL), Observability (Grafana), CI/CD automation.
+| Layer         | Tech                  |
+|---------------|-----------------------|
+| Messaging     | Apache Kafka          |
+| Backend       | Flask, Python         |
+| Orchestration | Docker Compose        |
 
----
+## Key design decisions
 
-## 🚧 Development Status
+- **Kafka over direct HTTP calls**: decouples sensor producers from backend consumers. Sensors keep producing even if the consumer is temporarily offline, and Kafka's persistent buffer prevents data loss on consumer failure. Also enables multiple consumers (monitoring, storage, alerting) to process the same stream independently.
 
-This project is in-progress and being actively built out over several weeks. Functional milestones include:
+- **Separate simulator process**: mirrors real-world architecture where sensors operate independently from the processing layer. Makes it straightforward to swap the simulator for real sensor input later without changing the consumer.
 
-- ✅ Simulated data production via Kafka
-- ✅ Real-time Kafka consumer backend with anomaly detection
-- 🔄 WebSocket + frontend live integration (in progress)
-- 🧱 Storage, monitoring, and deployment features (planned)
+- **Anomaly detection at consumer layer**: keeps producers lightweight and moves processing logic to a horizontally scalable layer that can be replicated as data volume grows.
 
----
+- **Flask for the consumer**: the engineering focus of this project is the streaming architecture, not the HTTP layer. Flask is lightweight and sufficient for this scope. If the workload required high concurrency or async processing, FastAPI would be a natural upgrade path.
 
-## 👀 Who Is This For?
+- **Docker Compose for orchestration**: running Kafka broker, simulator, and consumer as three separate services locally is painful without orchestration. Compose defines the full dev environment in one file, making the project reproducible for anyone who clones the repo.
 
-This project is ideal for:
-- Students or engineers building portfolio projects for systems/backend/infrastructure roles
-- Developers exploring Kafka and real-time data processing
-- Teams needing a lightweight prototype for IIoT monitoring pipelines
+## Running locally
 
----
+```bash
+# Start Kafka
+cd kafka-docker
+docker-compose up -d
 
-This README is a living document and will be fully updated when the project reaches a publish-ready milestone.
+# Run the simulator
+cd ../simulator
+python simulator.py
+
+# Run the consumer
+cd ../backend
+python consumer.py
+```
+
+## Author
+
+Wan-Lin Yang — [GitHub](https://github.com/wanlinyang1111)
