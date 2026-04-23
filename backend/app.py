@@ -1,13 +1,14 @@
-import eventlet
-eventlet.monkey_patch()
-
 from flask import Flask
 from flask_socketio import SocketIO
 from kafka import KafkaConsumer
 import json
 
+# TODO: Threading mode doesn't broadcast sensor_data events to frontend correctly.
+# Backend Kafka pipeline works; WebSocket handshake succeeds but events don't reach client.
+# Needs investigation into Flask-SocketIO threading mode + background task interaction.
+
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins=["http://localhost:8080"], async_mode='eventlet')
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
 @app.route('/')
 def index():
@@ -25,13 +26,11 @@ def consume_kafka():
         data = message.value
         print("Received from Kafka:", data)
 
-        # 判斷異常
         abnormal = False
         if data['temperature'] > 70 or data['vibration'] > 0.1:
             abnormal = True
             print("⚠️ 異常偵測！溫度或震動超標！")
 
-        # 連同是否異常的標記一起送給前端
         data['abnormal'] = abnormal
         socketio.emit('sensor_data', data)
 
